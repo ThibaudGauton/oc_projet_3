@@ -21,7 +21,7 @@ public class AuthService {
     @Transactional
     public String register(RegisterRequest request) {
         // Validate if email already exists
-        if (userRepository.findByNameOrEmail(request.getName(), request.getEmail()).isPresent()) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email already in use");
         }
 

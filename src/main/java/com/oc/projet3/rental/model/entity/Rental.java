@@ -34,10 +34,6 @@ public class Rental {
     @OneToMany(mappedBy = "rental")
     private final List<Message> messages;
 
-    public User getOwner() {
-        return owner;
-    }
-
     public Rental() {
         this.messages = new ArrayList<>();
     }
