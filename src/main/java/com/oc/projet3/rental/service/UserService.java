@@ -1,6 +1,6 @@
 package com.oc.projet3.rental.service;
 
-import com.oc.projet3.rental.model.User;
+import com.oc.projet3.rental.model.entity.User;
 import com.oc.projet3.rental.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

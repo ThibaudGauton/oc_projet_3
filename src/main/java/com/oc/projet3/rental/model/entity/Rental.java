@@ -1,4 +1,4 @@
-package com.oc.projet3.rental.model;
+package com.oc.projet3.rental.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

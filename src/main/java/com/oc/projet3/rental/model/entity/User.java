@@ -1,4 +1,4 @@
-package com.oc.projet3.rental.model;
+package com.oc.projet3.rental.model.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,6 +14,18 @@ public class User {
     private String name;
     private String email;
     private String password;
+
+    public User(String name, String email, String hashedPassword) {
+        this.name = name;
+        this.email = email;
+        this.password = hashedPassword;
+    }
+
+    public User() {
+        this.name = "";
+        this.email = "";
+        this.password = "";
+    }
 
     public String getEmail() {
         return email;
