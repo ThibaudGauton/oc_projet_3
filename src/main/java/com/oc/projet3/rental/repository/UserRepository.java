@@ -1,10 +1,9 @@
 package com.oc.projet3.rental.repository;
 
-import com.oc.projet3.rental.model.User;
+import com.oc.projet3.rental.model.entity.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -23,9 +22,25 @@ public class UserRepository implements CrudRepository<User, Long> {
         return query.getResultStream().findFirst(); // returns Optional<User>
     }
 
+    public Optional<User> findByNameOrEmail(String name, String email) {
+        String jpql = "SELECT u FROM User u WHERE u.name = :name OR u.email = :email";
+        TypedQuery<User> query = entityManager.createQuery(jpql, User.class);
+        query.setParameter("name", name);
+        query.setParameter("email", email);
+
+        return query.getResultStream().findFirst(); // returns Optional<User>
+    }
+
     @Override
     public <S extends User> S save(S entity) {
-        return null;
+        if (entity.getId() == null) {
+            // New entity, persist it
+            entityManager.persist(entity);
+            return entity;
+        } else {
+            // Existing entity, merge it
+            return entityManager.merge(entity);
+        }
     }
 
     @Override
