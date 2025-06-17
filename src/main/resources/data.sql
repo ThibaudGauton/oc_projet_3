@@ -34,6 +34,7 @@ CREATE TABLE message (
     message VARCHAR(255),
     rental_id BIGINT NOT NULL,
     author_id BIGINT NOT NULL,
+    created_at DATETIME,
     CONSTRAINT fk_rental FOREIGN KEY (rental_id) REFERENCES rental(id),
     CONSTRAINT fk_author FOREIGN KEY (author_id) REFERENCES `user`(id)
 );
