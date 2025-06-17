@@ -1,5 +1,6 @@
 package com.oc.projet3.rental.service;
 
+import com.oc.projet3.rental.model.dto.LightUserDTO;
 import com.oc.projet3.rental.model.entity.User;
 import com.oc.projet3.rental.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,5 +62,21 @@ public class UserService implements UserDetailsService {
         String userEmail = ((Jwt) authentication.getPrincipal()).getSubject();
 
         return userRepository.findByEmail(userEmail);
+    }
+
+    /**
+     * Retrieves a user by their ID.
+     * @param id The ID of the user to retrieve.
+     * @return An Optional containing the User entity if found, otherwise empty.
+     */
+    public Optional<LightUserDTO> getUserById(Long id) {
+        Optional<User> user = userRepository.findById(id);
+
+        LightUserDTO lightUserDTO = null;
+        if (user.isPresent()) {
+            lightUserDTO = new LightUserDTO(user.get().getName());
+        }
+
+        return Optional.ofNullable(lightUserDTO);
     }
 }
