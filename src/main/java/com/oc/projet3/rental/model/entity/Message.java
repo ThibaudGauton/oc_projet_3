@@ -1,23 +1,28 @@
 package com.oc.projet3.rental.model.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
+
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Message {
-    @Getter
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Setter
-    @Getter
     private String message;
-    @Setter
-    @Getter
     @ManyToOne
     @JoinColumn(name = "rental_id")
     private Rental rental;
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    private User user;
+    private Date created_at;
 }
