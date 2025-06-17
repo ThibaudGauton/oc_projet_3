@@ -3,9 +3,12 @@ package com.oc.projet3.rental.service;
 import com.oc.projet3.rental.model.entity.User;
 import com.oc.projet3.rental.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -44,5 +47,19 @@ public class UserService implements UserDetailsService {
                 .withUsername(user.getEmail())
                 .password(user.getPassword())
                 .build();
+    }
+
+    public Optional<User> getCurrentAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !(authentication.getPrincipal() instanceof Jwt)) {
+            return Optional.empty(); // No authenticated JWT principal
+        }
+
+        // The 'sub' (subject) claim in a JWT usually contains the principal's identifier,
+        // which you've set as the email in your JWTService.
+        String userEmail = ((Jwt) authentication.getPrincipal()).getSubject();
+
+        return userRepository.findByEmail(userEmail);
     }
 }

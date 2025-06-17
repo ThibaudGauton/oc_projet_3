@@ -1,37 +1,24 @@
 package com.oc.projet3.rental.model.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.Date;
+
+@Getter
+@Setter
 public class CurrentUserDTO {
     private Long id;
     private String email;
     private String name;
+    private Date created_at;
+    private Date updated_at;
 
-    public CurrentUserDTO(Long id, String email, String name) {
+    public CurrentUserDTO(Long id, String email, String name, Date created_at, Date updated_at) {
         this.id = id;
         this.email = email;
         this.name = name;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+        this.created_at = created_at;
+        this.updated_at = updated_at;
     }
 }
