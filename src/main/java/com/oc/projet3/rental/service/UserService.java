@@ -56,11 +56,9 @@ public class UserService implements UserDetailsService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !(authentication.getPrincipal() instanceof Jwt)) {
-            return Optional.empty(); // No authenticated JWT principal
+            return Optional.empty();
         }
 
-        // The 'sub' (subject) claim in a JWT usually contains the principal's identifier,
-        // which you've set as the email in your JWTService.
         String userEmail = ((Jwt) authentication.getPrincipal()).getSubject();
 
         return userRepository.findByEmail(userEmail);
