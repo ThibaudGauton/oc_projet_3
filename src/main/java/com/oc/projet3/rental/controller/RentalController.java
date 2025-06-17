@@ -7,6 +7,8 @@ import com.oc.projet3.rental.model.entity.Rental;
 import com.oc.projet3.rental.model.entity.User;
 import com.oc.projet3.rental.service.RentalService;
 import com.oc.projet3.rental.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +33,7 @@ public class RentalController {
         this.userService = userService;
     }
 
+    @Operation(summary = "", security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping
     public ResponseEntity<RentalDTO> createRental(
             @RequestParam("name") String name,
@@ -65,6 +68,7 @@ public class RentalController {
         }
     }
 
+    @Operation(summary = "/{id}", security = @SecurityRequirement(name = "bearerAuth"))
     @PutMapping("/{id}")
     public ResponseEntity<RentalDTO> updateRental(
             @PathVariable Long id,
@@ -89,6 +93,7 @@ public class RentalController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @Operation(summary = "/{id}", security = @SecurityRequirement(name = "bearerAuth"))
     @GetMapping("/{id}")
     public ResponseEntity<RentalDTO> getRentalById(@PathVariable Long id) {
         Optional<RentalDTO> rental = rentalService.getRentalById(id);
@@ -97,6 +102,7 @@ public class RentalController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "/", security = @SecurityRequirement(name = "bearerAuth"))
     @GetMapping
     public ResponseEntity<RentalListResponse> getAllRentals() {
         List<RentalDTO> rentalDTOs = (List<RentalDTO>) rentalService.getAllRentals();

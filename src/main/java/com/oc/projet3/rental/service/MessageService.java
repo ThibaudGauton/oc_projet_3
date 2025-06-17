@@ -7,7 +7,7 @@ import com.oc.projet3.rental.model.entity.Rental;
 import com.oc.projet3.rental.model.entity.User;
 import com.oc.projet3.rental.repository.MessageRepository;
 import com.oc.projet3.rental.repository.RentalRepository;
-import com.oc.projet3.rental.repository.UserRepository; // Import UserRepository
+import com.oc.projet3.rental.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
