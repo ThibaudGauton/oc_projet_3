@@ -27,22 +27,18 @@ public class AuthService {
 
     @Transactional
     public String register(RegisterRequest request) {
-        // Validate if email already exists
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email already in use");
         }
 
-        // Hash the password
         String hashedPassword = passwordEncoder.encode(request.getPassword());
 
-        // Create new User entity
         User user = new User(
                 request.getName(),
                 request.getEmail(),
                 hashedPassword
         );
 
-        // Save user in DB
         userRepository.save(user);
 
         return jwtService.generateToken(Optional.of(user));
