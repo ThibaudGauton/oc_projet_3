@@ -2,10 +2,11 @@ package com.oc.projet3.rental.controller;
 
 import com.oc.projet3.rental.model.dto.MessageRequest;
 import com.oc.projet3.rental.model.dto.MessageResponse;
-import com.oc.projet3.rental.model.entity.User; // Import User for getting current user ID
+import com.oc.projet3.rental.model.entity.User;
 import com.oc.projet3.rental.service.MessageService;
-import com.oc.projet3.rental.service.UserService; // Import UserService to get authenticated user
-
+import com.oc.projet3.rental.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +28,7 @@ public class MessageController {
         this.userService = userService;
     }
 
+    @Operation(summary = "", security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping
     public ResponseEntity<?> createMessage(@RequestBody MessageRequest messageRequest) {
         Optional<User> currentUserOptional = userService.getCurrentAuthenticatedUser();
