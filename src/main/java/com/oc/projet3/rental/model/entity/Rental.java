@@ -9,27 +9,22 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
+@Setter
+@Getter
 public class Rental {
     @Getter
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Setter
     private String name;
-    @Setter
     private float price;
-    @Setter
     private float surface;
-    @Setter
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private User owner;
-    @Setter
     private Date created_at;
-    @Setter
     private Date updated_at;
-    @Setter
     private String description;
-    @Setter
     private String picture;
     @OneToMany(mappedBy = "rental")
     private final List<Message> messages;

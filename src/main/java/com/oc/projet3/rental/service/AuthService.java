@@ -8,14 +8,21 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JWTService jwtService;
 
-    public AuthService(UserRepository userRepository) {
+    public AuthService(
+            UserRepository userRepository,
+            JWTService jwtService
+    ) {
         this.userRepository = userRepository;
-        this.passwordEncoder = new BCryptPasswordEncoder();  // can be moved to a @Bean if preferred
+        this.passwordEncoder = new BCryptPasswordEncoder();
+        this.jwtService = jwtService;
     }
 
     @Transactional
@@ -38,6 +45,6 @@ public class AuthService {
         // Save user in DB
         userRepository.save(user);
 
-        return "User " + request.getName() + " registered successfully!";
+        return jwtService.generateToken(Optional.of(user));
     }
 }

@@ -38,8 +38,15 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@RequestBody RegisterRequest request) {
-        return authService.register(request);
+    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
+        try {
+            String token = authService.register(request);
+            return ResponseEntity.ok(new JwtResponse(token));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred during registration.");
+        }
     }
 
     @PostMapping("/login")
@@ -74,7 +81,9 @@ public class AuthController {
             CurrentUserDTO currentUserDTO = new CurrentUserDTO(
                     user.get().getId(),
                     user.get().getEmail(),
-                    user.get().getName()
+                    user.get().getName(),
+                    user.get().getCreatedAt(),
+                    user.get().getUpdatedAt()
             );
 
             return ResponseEntity.ok(currentUserDTO);

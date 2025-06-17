@@ -7,20 +7,19 @@ CREATE TABLE `user`
     id       BIGINT AUTO_INCREMENT PRIMARY KEY,
     name     VARCHAR(250) NOT NULL,
     email    VARCHAR(250) NOT NULL,
-    password VARCHAR(250) NOT NULL
+    password VARCHAR(250) NOT NULL,
+    created_at DATETIME,
+    updated_at DATETIME
 );
-
-INSERT INTO `user` (name, email, password) VALUES
-('Thibaud GAUTON', 'gauton.thibaud@gmail.com', 'pass');
 
 
 
 CREATE TABLE rental (
-    id BIGINT NOT NULL PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255),
     price FLOAT,
     surface FLOAT,
-    owner_id BIGINT,
+    owner_id BIGINT NOT NULL,
     created_at TIMESTAMP,
     updated_at TIMESTAMP,
     description TEXT,
@@ -31,10 +30,10 @@ CREATE TABLE rental (
 
 
 CREATE TABLE message (
-    id BIGINT NOT NULL PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     message VARCHAR(255),
-    rental_id BIGINT,
-    author_id BIGINT,
+    rental_id BIGINT NOT NULL,
+    author_id BIGINT NOT NULL,
     CONSTRAINT fk_rental FOREIGN KEY (rental_id) REFERENCES rental(id),
     CONSTRAINT fk_author FOREIGN KEY (author_id) REFERENCES `user`(id)
 );
