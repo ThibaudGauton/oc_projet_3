@@ -55,14 +55,12 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         System.out.println("Login request: " + request);
 
-        // Fetch user from database by email
         Optional<User> user = userRepository.findByEmail(request.getEmail());
 
         if (user.isEmpty() || !passwordEncoder.matches(request.getPassword(), user.get().getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
 
-        // If valid, create authentication manually or just generate JWT
         String jwt = jwtService.generateToken(user);
 
         return ResponseEntity.ok(new JwtResponse(jwt));

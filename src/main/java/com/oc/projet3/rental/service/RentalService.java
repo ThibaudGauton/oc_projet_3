@@ -28,31 +28,26 @@ public class RentalService {
     }
 
     public RentalDTO saveRentalWithImage(Rental rental, MultipartFile pictureFile) throws IOException {
-        String filename = null; // Initialize filename to null
+        String filename = null;
 
         if (pictureFile != null && !pictureFile.isEmpty()) {
-            // 1. Generate a unique and clean filename
             filename = generateUniqueAndCleanFilename(pictureFile.getOriginalFilename());
             Path uploadPath = Paths.get(UPLOAD_DIR);
 
-            // Create the directory if it doesn't exist
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
 
-            // Save the file to the specified directory
             Path filePath = uploadPath.resolve(filename);
             Files.copy(pictureFile.getInputStream(), filePath);
         }
 
-        // Set the picture filename in the rental object (will be null if no file uploaded)
         rental.setPicture(filename);
-        rental.setCreated_at(new Date()); // Set creation date
-        rental.setUpdated_at(new Date()); // Set update date
+        rental.setCreated_at(new Date());
+        rental.setUpdated_at(new Date());
 
         Rental savedRentalInDb = rentalRepository.save(rental);
 
-        // Save the rental object to the database
         return mapToRentalDTO(savedRentalInDb);
     }
 
@@ -86,7 +81,6 @@ public class RentalService {
 
     public Iterable<RentalDTO> getAllRentals() {
         Collection<Rental> rentals = rentalRepository.findAll();
-        // Convert the Iterable of Rental entities to a List of RentalDTOs
         return rentals.stream()
                 .map(this::mapToRentalDTO)
                 .collect(Collectors.toList());
@@ -134,27 +128,23 @@ public class RentalService {
         Optional<Rental> existingRentalOptional = rentalRepository.findById(id);
 
         if (existingRentalOptional.isEmpty()) {
-            return Optional.empty(); // Rental not found
+            return Optional.empty();
         }
 
         Rental existingRental = existingRentalOptional.get();
 
-        // Authorization check: Only the owner can update their rental
         if (!existingRental.getOwner().getId().equals(currentUserId)) {
             return Optional.empty();
         }
 
-        // Apply updates from the DTO to the existing entity
         existingRental.setName(updateRequest.getName());
         existingRental.setSurface(updateRequest.getSurface());
         existingRental.setPrice(updateRequest.getPrice());
         existingRental.setDescription(updateRequest.getDescription());
-        existingRental.setUpdated_at(new Date()); // Update timestamp
+        existingRental.setUpdated_at(new Date());
 
-        // Save the updated rental (will perform an UPDATE operation)
         Rental updatedRentalInDb = rentalRepository.save(existingRental);
 
-        // Map and return the updated DTO with the full image URL
         return Optional.of(mapToRentalDTO(updatedRentalInDb));
     }
 }
