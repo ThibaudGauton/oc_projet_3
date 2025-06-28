@@ -8,6 +8,7 @@ import com.oc.projet3.rental.model.entity.User;
 import com.oc.projet3.rental.repository.UserRepository;
 import com.oc.projet3.rental.service.AuthService;
 import com.oc.projet3.rental.service.JWTService;
+import com.oc.projet3.rental.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
@@ -26,17 +27,20 @@ public class AuthController {
     private final JWTService jwtService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
 
     public AuthController(
             AuthService authService,
             JWTService jwtService,
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            UserService userService
     ) {
         this.authService = authService;
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userService = userService;
     }
 
     @PostMapping("/register")
@@ -53,8 +57,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        System.out.println("Login request: " + request);
-
         Optional<User> user = userRepository.findByEmail(request.getEmail());
 
         if (user.isEmpty() || !passwordEncoder.matches(request.getPassword(), user.get().getPassword())) {
@@ -70,24 +72,16 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        System.out.println(principal);
         if (principal instanceof Jwt jwt) {
             String email = jwt.getSubject();
 
-            Optional<User> user = userRepository.findByEmail(email);
-            if (user.isEmpty()) {
+            Optional<CurrentUserDTO> currentUserDTO = userService.getCurrentUserDetails(email);
+
+            if (currentUserDTO.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
             }
 
-            CurrentUserDTO currentUserDTO = new CurrentUserDTO(
-                    user.get().getId(),
-                    user.get().getEmail(),
-                    user.get().getName(),
-                    user.get().getCreatedAt(),
-                    user.get().getUpdatedAt()
-            );
-
-            return ResponseEntity.ok(currentUserDTO);
+            return ResponseEntity.ok(currentUserDTO.get());
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }

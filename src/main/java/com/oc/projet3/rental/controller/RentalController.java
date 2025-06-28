@@ -52,16 +52,9 @@ public class RentalController {
             }
             User owner = ownerOptional.get();
 
-            Rental rental = new Rental();
-            rental.setName(name);
-            rental.setSurface(surface);
-            rental.setPrice(price);
-            rental.setDescription(description);
-            rental.setOwner(owner);
+            RentalDTO createdRental = rentalService.saveRentalWithImage(name, surface, price, description, pictureFile, owner);
 
-            RentalDTO savedRental = rentalService.saveRentalWithImage(rental, pictureFile);
-            setFullImageUrl(savedRental);
-            return new ResponseEntity<>(savedRental, HttpStatus.CREATED);
+            return new ResponseEntity<>(createdRental, HttpStatus.CREATED);
         } catch (IOException e) {
             System.err.println("Error saving rental with image: " + e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -85,9 +78,7 @@ public class RentalController {
         }
         Long currentUserId = currentUserOptional.get().getId();
 
-        RentalUpdateRequest updateRequest = new RentalUpdateRequest(name, surface, price, description);
-
-        Optional<RentalDTO> updatedRentalDTO = rentalService.updateRental(id, updateRequest, currentUserId);
+        Optional<RentalDTO> updatedRentalDTO = rentalService.updateRental(id, name, surface, price, description, currentUserId);
 
         return updatedRentalDTO.map(ResponseEntity::ok)
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
@@ -105,26 +96,9 @@ public class RentalController {
     @Operation(summary = "/", security = @SecurityRequirement(name = "bearerAuth"))
     @GetMapping
     public ResponseEntity<RentalListResponse> getAllRentals() {
-        List<RentalDTO> rentalDTOs = (List<RentalDTO>) rentalService.getAllRentals();
-
-        for (RentalDTO rental : rentalDTOs) {
-            setFullImageUrl(rental);
-        }
-        RentalListResponse response = new RentalListResponse(rentalDTOs);
-
+        RentalListResponse response = rentalService.getAllRentals();
         return ResponseEntity.ok(response);
     }
 
-    private void setFullImageUrl(RentalDTO rental) {
-        if (rental.getPicture() != null && !rental.getPicture().isEmpty()) {
-            String storedFilename = rental.getPicture();
-            if (!storedFilename.startsWith("http://") && !storedFilename.startsWith("https://")) {
-                String imageUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-                        .path("/images/")
-                        .path(storedFilename)
-                        .toUriString();
-                rental.setPicture(imageUrl);
-            }
-        }
-    }
+
 }

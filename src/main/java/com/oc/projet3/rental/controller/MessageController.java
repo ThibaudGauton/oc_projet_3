@@ -28,7 +28,7 @@ public class MessageController {
         this.userService = userService;
     }
 
-    @Operation(summary = "", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Create a new message for a rental", security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping
     public ResponseEntity<?> createMessage(@RequestBody MessageRequest messageRequest) {
         Optional<User> currentUserOptional = userService.getCurrentAuthenticatedUser();
@@ -37,15 +37,16 @@ public class MessageController {
         }
         Long currentAuthenticatedUserId = currentUserOptional.get().getId();
 
-        Optional<MessageResponse> savedMessageResponse = messageService.saveMessage(messageRequest, currentAuthenticatedUserId);
+        try {
+            Optional<MessageResponse> savedMessageResponse = messageService.createMessage(messageRequest, currentAuthenticatedUserId);
 
-        if (savedMessageResponse.isPresent()) {
-            return new ResponseEntity<>(savedMessageResponse.get(), HttpStatus.CREATED);
-        } else {
-            if (!messageRequest.getUserId().equals(currentAuthenticatedUserId)) {
-                return new ResponseEntity<>("Forbidden: User ID in request does not match authenticated user.", HttpStatus.FORBIDDEN);
+            if (savedMessageResponse.isPresent()) {
+                return new ResponseEntity<>(savedMessageResponse.get(), HttpStatus.CREATED);
+            } else {
+                return new ResponseEntity<>("Bad Request: Could not create message (e.g., rental or user not found).", HttpStatus.BAD_REQUEST);
             }
-            return new ResponseEntity<>("Bad Request: Could not create message (e.g., rental not found).", HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
     }
 }

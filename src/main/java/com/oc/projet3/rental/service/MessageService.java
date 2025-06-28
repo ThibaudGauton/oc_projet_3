@@ -9,6 +9,7 @@ import com.oc.projet3.rental.repository.MessageRepository;
 import com.oc.projet3.rental.repository.RentalRepository;
 import com.oc.projet3.rental.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.Optional;
@@ -26,43 +27,34 @@ public class MessageService {
         this.userRepository = userRepository;
     }
 
-    /**
-     * Saves a new message after performing authorization checks.
-     * @param messageRequest The incoming message data from the client.
-     * @param currentAuthenticatedUserId The ID of the currently authenticated user from the JWT.
-     * @return An Optional containing the MessageResponse if the message was saved, otherwise empty.
-     */
-    public Optional<MessageResponse> saveMessage(MessageRequest messageRequest, Long currentAuthenticatedUserId) {
-
-        if (!messageRequest.getUserId().equals(currentAuthenticatedUserId)) {
-            System.err.println("Unauthorized message creation attempt: Request userId " + messageRequest.getUserId() +
-                    " does not match authenticated userId " + currentAuthenticatedUserId);
-            return Optional.empty();
+    @Transactional
+    public Optional<MessageResponse> createMessage(MessageRequest messageRequest, Long authenticatedUserId) throws Exception, Exception {
+        if (!messageRequest.getUserId().equals(authenticatedUserId)) {
+            throw new Exception("User ID in request does not match authenticated user. Cannot create message on behalf of another user.");
         }
 
+        Optional<User> senderOptional = userRepository.findById(authenticatedUserId);
         Optional<Rental> rentalOptional = rentalRepository.findById(messageRequest.getRentalId());
-        if (rentalOptional.isEmpty()) {
-            System.err.println("Message creation failed: Rental with ID " + messageRequest.getRentalId() + " not found.");
-            return Optional.empty();
-        }
-        Rental rental = rentalOptional.get();
 
-        Optional<User> userOptional = userRepository.findById(currentAuthenticatedUserId);
-        if (userOptional.isEmpty()) {
-            System.err.println("Message creation failed: User with ID " + currentAuthenticatedUserId + " not found (should be authenticated).");
+        if (senderOptional.isEmpty() || rentalOptional.isEmpty()) {
+
             return Optional.empty();
         }
-        User author = userOptional.get();
+
+        User sender = senderOptional.get();
+        Rental rental = rentalOptional.get();
 
         Message newMessage = new Message();
         newMessage.setMessage(messageRequest.getMessage());
         newMessage.setRental(rental);
-        newMessage.setUser(author);
+        newMessage.setUser(sender);
         newMessage.setCreated_at(new Date());
 
         Message savedMessage = messageRepository.save(newMessage);
 
-        return Optional.of(mapToMessageResponse(savedMessage));
+        MessageResponse response = mapToMessageResponse(savedMessage);
+
+        return Optional.of(response);
     }
 
     private MessageResponse mapToMessageResponse(Message message) {

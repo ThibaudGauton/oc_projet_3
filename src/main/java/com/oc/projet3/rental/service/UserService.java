@@ -1,5 +1,6 @@
 package com.oc.projet3.rental.service;
 
+import com.oc.projet3.rental.model.dto.CurrentUserDTO;
 import com.oc.projet3.rental.model.dto.LightUserDTO;
 import com.oc.projet3.rental.model.entity.User;
 import com.oc.projet3.rental.repository.UserRepository;
@@ -78,5 +79,24 @@ public class UserService implements UserDetailsService {
         }
 
         return Optional.ofNullable(lightUserDTO);
+    }
+
+    public Optional<CurrentUserDTO> getCurrentUserDetails(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+
+        if (user.isEmpty()) {
+            return Optional.empty();
+        }
+
+        User foundUser = user.get();
+        CurrentUserDTO currentUserDTO = new CurrentUserDTO(
+                foundUser.getId(),
+                foundUser.getEmail(),
+                foundUser.getName(),
+                foundUser.getCreatedAt(),
+                foundUser.getUpdatedAt()
+        );
+
+        return Optional.of(currentUserDTO);
     }
 }

@@ -1,8 +1,10 @@
 package com.oc.projet3.rental.service;
 
 import com.oc.projet3.rental.model.dto.RentalDTO;
+import com.oc.projet3.rental.model.dto.RentalListResponse;
 import com.oc.projet3.rental.model.dto.RentalUpdateRequest;
 import com.oc.projet3.rental.model.entity.Rental;
+import com.oc.projet3.rental.model.entity.User;
 import com.oc.projet3.rental.repository.RentalRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,10 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,7 +26,14 @@ public class RentalService {
         this.rentalRepository = rentalRepository;
     }
 
-    public RentalDTO saveRentalWithImage(Rental rental, MultipartFile pictureFile) throws IOException {
+    public RentalDTO saveRentalWithImage(String name, float surface, float price, String description, MultipartFile pictureFile, User owner) throws IOException {
+        Rental rental = new Rental();
+        rental.setName(name);
+        rental.setSurface(surface);
+        rental.setPrice(price);
+        rental.setDescription(description);
+        rental.setOwner(owner);
+
         String filename = null;
 
         if (pictureFile != null && !pictureFile.isEmpty()) {
@@ -79,11 +85,29 @@ public class RentalService {
                 .map(this::mapToRentalDTO);
     }
 
-    public Iterable<RentalDTO> getAllRentals() {
+    public RentalListResponse getAllRentals() {
         Collection<Rental> rentals = rentalRepository.findAll();
-        return rentals.stream()
+        List<RentalDTO> rentalDTOs = rentals.stream()
                 .map(this::mapToRentalDTO)
                 .collect(Collectors.toList());
+        for (RentalDTO rental : rentalDTOs) {
+            setFullImageUrl(rental);
+        }
+
+        return new RentalListResponse(rentalDTOs);
+    }
+
+    private void setFullImageUrl(RentalDTO rental) {
+        if (rental.getPicture() != null && !rental.getPicture().isEmpty()) {
+            String storedFilename = rental.getPicture();
+            if (!storedFilename.startsWith("http://") && !storedFilename.startsWith("https://")) {
+                String imageUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                        .path("/images/")
+                        .path(storedFilename)
+                        .toUriString();
+                rental.setPicture(imageUrl);
+            }
+        }
     }
 
     private RentalDTO mapToRentalDTO(Rental rental) {
@@ -124,12 +148,15 @@ public class RentalService {
      * @param currentUserId The ID of the currently authenticated user (for authorization).
      * @return An Optional containing the updated RentalDTO if successful, otherwise empty.
      */
-    public Optional<RentalDTO> updateRental(Long id, RentalUpdateRequest updateRequest, Long currentUserId) {
+    public Optional<RentalDTO> updateRental(Long id, String name, float surface, float price, String description, Long currentUserId) {
         Optional<Rental> existingRentalOptional = rentalRepository.findById(id);
 
         if (existingRentalOptional.isEmpty()) {
             return Optional.empty();
         }
+
+        RentalUpdateRequest updateRequest = new RentalUpdateRequest(name, surface, price, description);
+
 
         Rental existingRental = existingRentalOptional.get();
 
