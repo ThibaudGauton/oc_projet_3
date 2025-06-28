@@ -42,8 +42,6 @@ public class RentalController {
             @RequestParam("description") String description,
             @RequestParam("picture") MultipartFile pictureFile
     ) {
-        System.out.println("Received rental creation request for name: " + name);
-
         try {
             Optional<User> ownerOptional = userService.getCurrentAuthenticatedUser();
 
@@ -70,8 +68,6 @@ public class RentalController {
             @RequestParam("price") float price,
             @RequestParam("description") String description
     ) {
-        System.out.println("Received rental update request for ID: " + id);
-
         Optional<User> currentUserOptional = userService.getCurrentAuthenticatedUser();
         if (currentUserOptional.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
